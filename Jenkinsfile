@@ -1,5 +1,3 @@
-#Pipeline setup for TF script execution
-
 pipeline {
   
   agent any  
