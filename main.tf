@@ -131,7 +131,7 @@ resource "aws_instance" "sample_instance" {
 
 	provisioner "file" {
     		source      = "sshd_config"
-    		destination = "/etc/ssh/sshd_config"
+    		destination = "/etc/ssh/"
   	}
 	
 	tags = {
