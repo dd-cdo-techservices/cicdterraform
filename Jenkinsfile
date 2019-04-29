@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-#Pipeline setup for TF script execution
-
-=======
->>>>>>> dd04591b96d87fe3390d67dbe980995f98d597c2
 pipeline {
   
   agent any  
