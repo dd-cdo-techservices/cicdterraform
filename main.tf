@@ -129,6 +129,11 @@ resource "aws_instance" "sample_instance" {
 	vpc_security_group_ids = ["${aws_security_group.cicd_sg.id}"]
 	user_data = "${var.user_data}"
 
+	provisioner "file" {
+    		source      = "sshd_config"
+    		destination = "/etc/ssh/sshd_config"
+  	}
+	
 	tags = {
     	  Name = "cicdsampleinstance"
     	  CreatedBy = "Sumanth"
