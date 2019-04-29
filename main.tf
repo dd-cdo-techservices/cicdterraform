@@ -83,7 +83,6 @@ resource "aws_route_table" "cicdpublicrt" {
 }
 
 
-
 #Associate Routing Table with Public Subnet
 resource "aws_route_table_association" "cicdrtassociate" {
 	subnet_id = "${aws_subnet.cicdnetworkpublicsubnet.id}"
@@ -128,6 +127,7 @@ resource "aws_instance" "sample_instance" {
 	subnet_id = "${aws_subnet.cicdnetworkpublicsubnet.id}"
 	depends_on = ["aws_internet_gateway.cicdgw"]
 	vpc_security_group_ids = ["${aws_security_group.cicd_sg.id}"]
+	user_data = "${var.user_data}"
 
 	tags = {
     	  Name = "cicdsampleinstance"
