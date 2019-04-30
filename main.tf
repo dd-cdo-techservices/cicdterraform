@@ -107,7 +107,7 @@ resource "aws_security_group" "cicd_sg" {
 	  from_port   = 22
     	  to_port     = 22
     	  protocol    = "tcp"
-    	  cidr_blocks = ["13.232.225.31/32"]
+    	  cidr_blocks = ["13.234.239.211/32"]
   	}
 
   	egress {
@@ -134,8 +134,12 @@ resource "aws_instance" "sample_instance" {
 	subnet_id = "${aws_subnet.cicdnetworkpublicsubnet.id}"
 	depends_on = ["aws_internet_gateway.cicdgw"]
 	vpc_security_group_ids = ["${aws_security_group.cicd_sg.id}"]
-	user_data = "${var.user_data}"
 
+	provisioner "file" {
+		source = "/home/ec2-user/.ssh/id_rsa.pub"
+		destination = "/home/ec2-user/.ssh/"
+	}
+	
 	tags = {
     	  Name = "cicdsampleinstance"
     	  CreatedBy = "Sumanth"
