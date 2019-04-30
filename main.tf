@@ -107,7 +107,7 @@ resource "aws_security_group" "cicd_sg" {
 	  from_port   = 22
     	  to_port     = 22
     	  protocol    = "tcp"
-    	  security_groups = "${aws_security_group.cicd_sg.id}"
+    	  cidr_blocks = ["50.0.3.0/24"]
   	}
 
   	egress {
