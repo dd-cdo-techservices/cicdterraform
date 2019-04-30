@@ -135,11 +135,6 @@ resource "aws_instance" "sample_instance" {
 	depends_on = ["aws_internet_gateway.cicdgw"]
 	vpc_security_group_ids = ["${aws_security_group.cicd_sg.id}"]
 
-	provisioner "file" {
-		source = "/home/ec2-user/.ssh/id_rsa.pub"
-		destination = "/home/ec2-user/.ssh/"
-	}
-	
 	tags = {
     	  Name = "cicdsampleinstance"
     	  CreatedBy = "Sumanth"
