@@ -9,6 +9,24 @@ provider "aws" {
 	region = "ap-south-1"
 }
 
+
+# Find the latest available AMI that is tagged with Name = sampleami
+data "aws_ami" "sampleimage" {
+  owners = ["self"]
+  filter {
+    name   = "state"
+    values = ["available"]
+  }
+
+  filter {
+    name   = "tag:Name"
+    values = ["ubuntu-custom-AMI"]
+  }
+
+  most_recent = true
+}
+
+
 # Create a VPC for setting up CICD pipeline infrastructure
 # with necessary components.
 
@@ -128,7 +146,7 @@ resource "aws_security_group" "cicd_sg" {
 
 # Provision an EC2 instance within the newly created VPC
 resource "aws_instance" "sample_instance" {
-	ami	= "ami-5b673c34"
+	ami	= "${data.aws_ami.sampleimage.id}"
 	instance_type	= "t2.micro"
 	associate_public_ip_address = "true"
 	subnet_id = "${aws_subnet.cicdnetworkpublicsubnet.id}"
