@@ -20,16 +20,7 @@ pipeline {
         sh 'terraform plan -out tfplanout'
       }
     }
-    
-    stage('approval') {
-      options {
-        timeout(time: 1, unit: 'HOURS') 
-      }
-      steps {
-        input 'approve the plan to proceed and apply'
-      }
-    }
-    
+        
     stage('apply') {
       steps {
         sh 'terraform apply -auto-approve tfplanout'
