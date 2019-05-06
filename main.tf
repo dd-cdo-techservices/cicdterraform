@@ -9,9 +9,8 @@ provider "aws" {
 	region = "ap-south-1"
 }
 
-
 # Find the latest available AMI that is tagged with Name = sampleami
-data "aws_ami" "sampleimage" {
+data "aws_ami" "ublampami" {
   owners = ["self"]
   filter {
     name   = "state"
@@ -26,12 +25,11 @@ data "aws_ami" "sampleimage" {
   most_recent = true
 }
 
-
 # Create a VPC for setting up CICD pipeline infrastructure
 # with necessary components.
 
 #VPC creation
-resource "aws_vpc" "cicdnetwork" {
+resource "aws_vpc" "uconecicdnet" {
 	cidr_block       = "50.0.0.0/16"
 	enable_dns_support = "true"
 	enable_dns_hostnames = "true"  
@@ -43,10 +41,9 @@ resource "aws_vpc" "cicdnetwork" {
   	}
 }
 
-
 #Internet Gateway creation
 resource "aws_internet_gateway" "cicdgw" {
-	vpc_id = "${aws_vpc.cicdnetwork.id}"
+	vpc_id = "${aws_vpc.uconecicdnet.id}"
 
 	tags = {
 	  Name = "CICDInternetGateway"
@@ -55,10 +52,9 @@ resource "aws_internet_gateway" "cicdgw" {
 	}
 }
 
-
 #Public subnet creation
 resource "aws_subnet" "cicdnetworkpublicsubnet" {
-	vpc_id = "${aws_vpc.cicdnetwork.id}"
+	vpc_id = "${aws_vpc.uconecicdnet.id}"
 	cidr_block = "50.0.3.0/24"
 	availability_zone = "ap-south-1a"
 
@@ -69,10 +65,9 @@ resource "aws_subnet" "cicdnetworkpublicsubnet" {
 	}
 }
 
-
 #Private subnet creation
 resource "aws_subnet" "cicdnetworkprivatesubnet" {
-        vpc_id = "${aws_vpc.cicdnetwork.id}"
+        vpc_id = "${aws_vpc.uconecicdnet.id}"
         cidr_block = "50.0.4.0/24"
         availability_zone = "ap-south-1b"
 
@@ -83,10 +78,9 @@ resource "aws_subnet" "cicdnetworkprivatesubnet" {
         }
 }
 
-
 #Provision Route Table for Public Subnet
 resource "aws_route_table" "cicdpublicrt" {
-	vpc_id = "${aws_vpc.cicdnetwork.id}"
+	vpc_id = "${aws_vpc.uconecicdnet.id}"
 	
 	route {
 	  cidr_block = "0.0.0.0/0"
@@ -100,13 +94,11 @@ resource "aws_route_table" "cicdpublicrt" {
         }
 }
 
-
 #Associate Routing Table with Public Subnet
 resource "aws_route_table_association" "cicdrtassociate" {
 	subnet_id = "${aws_subnet.cicdnetworkpublicsubnet.id}"
 	route_table_id = "${aws_route_table.cicdpublicrt.id}"
 }
-
 
 #Security group creation
 resource "aws_security_group" "cicd_sg" {
@@ -142,11 +134,9 @@ resource "aws_security_group" "cicd_sg" {
         }
 }
 
-
-
 # Provision an EC2 instance within the newly created VPC
 resource "aws_instance" "sample_instance" {
-	ami	= "${data.aws_ami.sampleimage.id}"
+	ami	= "${data.aws_ami.ublampami.id}"
 	instance_type	= "t2.micro"
 	associate_public_ip_address = "true"
 	subnet_id = "${aws_subnet.cicdnetworkpublicsubnet.id}"
@@ -159,7 +149,6 @@ resource "aws_instance" "sample_instance" {
     	  Purpose = "PipelineDemo"
 	}
 }
-
 
 # Provision Classic Load Balancer
 resource "aws_elb" "cicdclassicelb" {
@@ -193,7 +182,6 @@ resource "aws_elb" "cicdclassicelb" {
     Purpose = "PipelineDemo"
   }
 }
-
 
 #Display the output of public dns of created EC2
 output "aws_instance_public_dns" {
