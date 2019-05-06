@@ -104,7 +104,7 @@ resource "aws_route_table_association" "cicdrtassociate" {
 resource "aws_security_group" "cicd_sg" {
 	name        = "allow_http"
 	description = "Allow HTTP inbound traffic"
-	vpc_id      = "${aws_vpc.cicdnetwork.id}"
+	vpc_id      = "${aws_vpc.uconecicdnet.id}"
 
 	ingress {
 	  from_port   = 80
