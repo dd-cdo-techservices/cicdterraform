@@ -170,6 +170,7 @@ resource "aws_elb" "cicdclassicelb" {
     interval            = 30
   }
 
+  security_groups	= ["${aws_security_group.cicd_sg.id}"]
   instances                   = ["${aws_instance.sample_instance.id}"]
   cross_zone_load_balancing   = true
   idle_timeout                = 400
