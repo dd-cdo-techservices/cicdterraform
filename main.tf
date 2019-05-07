@@ -19,7 +19,7 @@ data "aws_ami" "ublampami" {
 
   filter {
     name   = "tag:Name"
-    values = ["ubuntu-custom-AMI"]
+    values = ["uc-one-lampub"]
   }
 
   most_recent = true
