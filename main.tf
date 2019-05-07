@@ -102,7 +102,7 @@ resource "aws_route_table_association" "cicdrtassociate" {
 
 #Security group creation
 resource "aws_security_group" "cicd_sg" {
-	name        = "allow_http"
+	name        = "wordpress_sg"
 	description = "Allow HTTP inbound traffic"
 	vpc_id      = "${aws_vpc.uconecicdnet.id}"
 
@@ -135,7 +135,7 @@ resource "aws_security_group" "cicd_sg" {
 }
 
 # Provision an EC2 instance within the newly created VPC
-resource "aws_instance" "sample_instance" {
+resource "aws_instance" "wordpress_instance" {
 	ami	= "${data.aws_ami.ublampami.id}"
 	instance_type	= "t2.micro"
 	associate_public_ip_address = "true"
@@ -144,7 +144,7 @@ resource "aws_instance" "sample_instance" {
 	vpc_security_group_ids = ["${aws_security_group.cicd_sg.id}"]
 
 	tags = {
-    	  Name = "cicdsampleinstance"
+    	  Name = "wordpress_server"
     	  CreatedBy = "Sumanth"
     	  Purpose = "PipelineDemo"
 	}
@@ -166,12 +166,12 @@ resource "aws_elb" "cicdclassicelb" {
     healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 3
-    target              = "HTTP:80/"
+    target              = "TCP:80/"
     interval            = 30
   }
 
   security_groups	= ["${aws_security_group.cicd_sg.id}"]
-  instances                   = ["${aws_instance.sample_instance.id}"]
+  instances                   = ["${aws_instance.wordpress_instance.id}"]
   cross_zone_load_balancing   = true
   idle_timeout                = 400
   connection_draining         = true
@@ -184,7 +184,7 @@ resource "aws_elb" "cicdclassicelb" {
   }
 }
 
-#Display the output of public dns of created EC2
-output "aws_instance_public_dns" {
-	value = "${aws_instance.sample_instance.public_dns}"
+#Display the output of public dns of ELB
+output "aws_elb_dns_name" {
+	value = "${aws_elb.cicdclassicelb.dns_name}"
 }
