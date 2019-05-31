@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
-    bucket = "sudevfta-tfstatefiles-feb"
-    key    = "cicdpipelinetfstatefiles/terraform.tfstate"
-    region = "ap-south-1"
+    bucket = "dd-poc-backups"
+    key    = "terraform-state-backup/terraform.tfstate"
+    region = "us-east-1"
   }
 }

@@ -12,7 +12,6 @@ provider "aws" {
 #Find the latest available AMI with Java App based on Name Tag
 data "aws_ami" "ubjavaami" {
   owners = ["self"]
-  most_recent = true
   filter {
     name   = "state"
     values = ["available"]
@@ -22,23 +21,42 @@ data "aws_ami" "ubjavaami" {
     name   = "tag:Name"
     values = ["uc-one-javaub"]
   }
+
+  most_recent = true
 }
 
-#Find the latest MYSQL AMI using Name Tag
 data "aws_ami" "ubmysqlami" {
   owners = ["self"]
-  most_recent = true
-
   filter {
     name   = "state"
     values = ["available"]
   }
 
-  tags = {
-    Name = "uc-one-MYSQLUB"
+  filter {
+    name   = "tag:Name"
+    values = ["uc-one-MYSQL*"]
   }
+  
+  most_recent = true
 }
 
+#Find the latest available MySQL DB AMI based on Name Tag
+#data "aws_ami" "ubmysqlami" {
+#  owners = ["self"]
+#  filter {
+#    name = "state"
+#    values = ["available"]
+#  }
+#
+#  filter {
+#    name   = "tag:Name"
+#    values = ["uc-one-MYSQLUB"]
+#  }
+#
+#  most_recent = true
+#}
+
+  
 # Create a VPC for setting up CICD pipeline infrastructure
 # with necessary components.
 
@@ -126,19 +144,12 @@ resource "aws_security_group" "cicd_sg" {
     	  protocol    = "tcp"
     	  cidr_blocks = ["0.0.0.0/0"]
   	}
-
-        ingress {
-	  from_port   = 8080
-	  to_port     = 8080
-	  protocol    = "tcp"
-	  cidr_blocks = ["0.0.0.0/0"]
-	}
 	
 	ingress {
 	  from_port   = 22
     	  to_port     = 22
     	  protocol    = "tcp"
-    	  cidr_blocks = ["18.213.75.241/32"]
+    	  cidr_blocks = ["13.234.217.54/32"]
   	}
 
   	egress {
@@ -188,10 +199,11 @@ resource "aws_security_group" "cicd_db_sg" {
 resource "aws_instance" "wordpress_server" {
 	ami				= "${data.aws_ami.ubjavaami.id}"
 	instance_type			= "t2.micro"
+	associate_public_ip_address 	= "true"
 	subnet_id 			= "${aws_subnet.uconenetworkpublicsubnet.id}"
 	depends_on			= ["aws_internet_gateway.cicdgw"]
 	vpc_security_group_ids 		= ["${aws_security_group.cicd_sg.id}"]
-	private_ip			= "${var.wordpress_appserver_privateip}"
+
 	tags = {
     	  Name		= "wordpress_server"
     	  CreatedBy	= "cdo_devops"
@@ -199,11 +211,6 @@ resource "aws_instance" "wordpress_server" {
 	}
 }
 
-#Associate Elastic IP to the App server
-resource "aws_eip_association" "eip_assoc_app" {
-	instance_id	= "${aws_instance.wordpress_server.id}"
-	allocation_id	= "${var.appserver_ip}"
-}
 
 
 #Provision an EC2 instance for hosting mysql db
@@ -212,9 +219,9 @@ resource "aws_instance" "mysql_server" {
 	instance_type			= "t2.micro"
 	subnet_id			= "${aws_subnet.uconenetworkprivatesubnet.id}"
 	vpc_security_group_ids		= ["${aws_security_group.cicd_db_sg.id}"]
-	private_ip			= "${var.wordpress_dbserver_privateip}"
+
 	tags = {
-	  Name		= "wordpress_mysqldb"
+	  Name		= "wordpress"
 	  CreatedBy	= "cdo_devops"
 	  Purpose	= "uconedemopipeline"
 	}
@@ -227,7 +234,7 @@ resource "aws_elb" "cicdclassicelb" {
   subnets	= ["${aws_subnet.uconenetworkpublicsubnet.id}"]
 
   listener {
-    instance_port     = 8080
+    instance_port     = 80
     instance_protocol = "http"
     lb_port           = 80
     lb_protocol       = "http"
